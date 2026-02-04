@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalender Viewer - Pro</title>
+    <style>
+        body { margin: 0; background: #000; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; overflow-x: hidden; }
+        #output { width: 100%; max-width: 600px; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
+        img { width: 100%; height: auto; display: block; }
+    </style>
+</head>
+<body>
+
+    <div id="output"></div>
+
+    <script>
+        // TEMPELKAN JSON BUNDLE DARI EDITOR DI BAWAH INI
+        const bundle = {
+  "config": {
+    "posY_Progress": 2423,
+    "posY_Header": 742,
+    "posY_Table": 863.252833009655,
+    "posY_Libur": 1599.8090777605942,
+    "posY_Quote": 1998.9410984722033,
+    "isDark": true,
+    "fH": 94,
+    "fT": 60,
+    "accent": "#c2c2c2",
+    "holidayText": "1-1: Tahun Baru 2026\n1-15: Isra Mikraj\n2-17: Tahun Baru Imlek\n3-19: Hari Suci Nyepi\n3-20: Idul Fitri 1447H\n3-21: Idul Fitri 1447H\n4-3: Wafat Yesus Kristus\n5-1: Hari Buruh\n5-14: Kenaikan Yesus Kristus\n5-31: Hari Raya Waisak\n6-1: Hari Lahir Pancasila\n6-27: Idul Adha\n7-17: Tahun Baru Islam\n8-17: Hari Kemerdekaan RI\n9-26: Maulid Nabi\n12-25: Hari Raya Natal",
+    "quoteText": "When your work speaks for itself, don't interrupt.",
+    "fontH": "sans-serif",
+    "fontQ": "serif",
+    "cachedQuote": "When your work speaks for itself, don't interrupt.",
+    "lastFetchDate": 3
+  },
+  "renderCode": "(ctx, canvas, cfg) => {\n        const now = new Date();\n        const m = now.getMonth();\n        const y = now.getFullYear();\n        const accent = cfg.accent;\n        const isDark = cfg.isDark;\n\n        const holidays = {};\n        if(cfg.holidayText) {\n            cfg.holidayText.split('\\n').forEach(line => {\n                const parts = line.split(':');\n                if(parts.length === 2) {\n                    const dateParts = parts[0].trim().split('-');\n                    const hMonth = parseInt(dateParts[0]) - 1;\n                    holidays[`${hMonth}-${dateParts[1]}`] = parts[1].trim();\n                }\n            });\n        }\n\n        const colorBG = isDark ? \"#121212\" : \"#ffffff\";\n        const colorTextMain = isDark ? \"#ffffff\" : \"#2d3436\";\n        const colorTextSub = isDark ? \"#636e72\" : \"#b2bec3\";\n        const colorCircle = isDark ? \"rgba(255,255,255,0.05)\" : \"#f5f6fa\";\n\n        ctx.fillStyle = colorBG;\n        ctx.fillRect(0, 0, canvas.width, canvas.height);\n\n        // Progress Bar & Day Counter\n        const startYear = new Date(y, 0, 1);\n        const endYear = new Date(y + 1, 0, 1);\n        const dayOfYear = Math.floor((now - startYear) / (1000 * 60 * 60 * 24)) + 1;\n        const totalDays = Math.floor((endYear - startYear) / (1000 * 60 * 60 * 24));\n        const progress = ((now - startYear) / (endYear - startYear) * 100).toFixed(1);\n\n        ctx.textAlign = \"center\";\n        ctx.font = \"bold 32px sans-serif\";\n        ctx.fillStyle = colorTextSub;\n        ctx.fillText(`DAY ${dayOfYear} OF ${totalDays} (${progress}%)`, canvas.width/2, cfg.posY_Progress - 40);\n\n        ctx.fillStyle = isDark ? \"#222\" : \"#eee\";\n        ctx.fillRect(150, cfg.posY_Progress, canvas.width - 300, 12);\n        ctx.fillStyle = accent;\n        ctx.fillRect(150, cfg.posY_Progress, (canvas.width - 300) * (progress/100), 12);\n\n        // Header\n        const names = [\"JANUARI\",\"FEBRUARI\",\"MARET\",\"APRIL\",\"MEI\",\"JUNI\",\"JULI\",\"AGUSTUS\",\"SEPTEMBER\",\"OKTOBER\",\"NOVEMBER\",\"DESEMBER\"];\n        ctx.fillStyle = colorTextMain;\n        ctx.font = `bold ${cfg.fH}px ${cfg.fontH || 'sans-serif'}`;\n        ctx.fillText(names[m], canvas.width/2, cfg.posY_Header);\n        ctx.fillStyle = accent;\n        ctx.font = `300 ${cfg.fH * 0.4}px ${cfg.fontH || 'sans-serif'}`;\n        ctx.fillText(y, canvas.width/2, cfg.posY_Header + (cfg.fH * 0.45));\n\n        // Kalender\n        const days = [\"MIN\", \"SEN\", \"SEL\", \"RAB\", \"KAM\", \"JUM\", \"SAB\"];\n        const colW = (canvas.width * 0.85) / 7;\n        const startX = (canvas.width - (colW * 7)) / 2;\n        ctx.font = `bold ${cfg.fT * 0.55}px sans-serif`;\n        days.forEach((d, i) => {\n            ctx.fillStyle = (i === 0) ? accent : colorTextSub;\n            ctx.fillText(d, startX + (i * colW) + colW/2, cfg.posY_Table);\n        });\n\n        const first = new Date(y, m, 1).getDay();\n        const total = new Date(y, m + 1, 0).getDate();\n        let row = 0; let found = [];\n\n        for (let d = 1; d <= total; d++) {\n            let col = (d + first - 1) % 7;\n            let px = startX + (col * colW) + colW/2;\n            let py = cfg.posY_Table + 160 + (row * cfg.fT * 2.5);\n            const libur = holidays[`${m}-${d}`];\n            if (libur) found.push({d, n: libur});\n\n            ctx.beginPath();\n            ctx.arc(px, py - cfg.fT/3, cfg.fT * 0.9, 0, Math.PI * 2);\n            ctx.fillStyle = (d === now.getDate()) ? accent : (col === 0 || libur ? accent + \"25\" : colorCircle);\n            ctx.fill();\n\n            ctx.font = (d === now.getDate()) ? `bold ${cfg.fT}px sans-serif` : `${cfg.fT}px sans-serif`;\n            ctx.fillStyle = (d === now.getDate()) ? \"#fff\" : (col === 0 || libur ? accent : colorTextMain);\n            ctx.fillText(d, px, py);\n            if (col === 6) row++;\n        }\n\n        // Libur Nasional\n        if (found.length > 0) {\n            ctx.textAlign = \"left\"; ctx.fillStyle = accent;\n            ctx.font = `bold ${cfg.fT * 0.5}px sans-serif`;\n            ctx.fillText(\"HARI LIBUR NASIONAL\", startX, cfg.posY_Libur);\n            found.forEach((h, i) => {\n                ctx.fillStyle = isDark ? \"#bdc3c7\" : \"#636e72\";\n                ctx.font = `${cfg.fT * 0.45}px sans-serif`;\n                ctx.fillText(`• ${h.d}: ${h.n}`, startX, cfg.posY_Libur + 75 + (i * 65));\n            });\n        }\n    }"
+};
+
+        function generateImage() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1170; // Standar resolusi layar HP modern
+            canvas.height = 2532;
+            const ctx = canvas.getContext('2d');
+
+            try {
+                // Konversi string kembali menjadi fungsi yang bisa dijalankan
+                const render = eval(bundle.renderCode);
+                render(ctx, canvas, bundle.config);
+
+                // Konversi ke format JPEG (lebih ringan)
+                const imgData = canvas.toDataURL("image/jpeg", 0.9);
+                const imgTag = document.createElement('img');
+                imgTag.src = imgData;
+                document.getElementById('output').appendChild(imgTag);
+            } catch (e) {
+                console.error("Gagal me-render kalender:", e);
+                document.body.innerHTML = "<h2 style='color:white; text-align:center;'>Gagal memuat kalender. Pastikan JSON valid.</h2>";
+            }
+        }
+
+        window.onload = generateImage;
+    </script>
+</body>
+</html>
