@@ -14,220 +14,221 @@
 
     <div id="output"></div>
 
+    <!-- Panggil data libur external -->
+    <script src="HariLibur.js"></script>
+
     <script>
+        // Ambil data dari LocalStorage jika ada (editan dari admin), jika tidak pakai dari HariLibur.js
+        const savedData = localStorage.getItem('custom_holidays');
+        const activeHolidays = savedData ? JSON.parse(savedData) : (window.holidayData || []);
+
+        // Formating ke format string "bulan-tanggal: nama"
+        const formattedHolidayText = activeHolidays
+            .map(item => `${item.month}-${item.day}: ${item.name}`)
+            .join('\n');
+
         const bundle = {
-  "config": {
-    "posY_Progress": 2423,
-    "posY_Header": 742,
-    "posY_Table": 863,
-    "posY_Libur": 1880, // Diturunkan sedikit lagi agar aman dari tanggal 31
-    "isDark": true,
-    "fH": 94,
-    "fT": 60,
-    "accent": "#3D947F", 
-    "holidayText": `1-1: Tahun Baru 2026\n1-15: Isra Mikraj\n2-17: Tahun Baru Imlek\n3-19: Hari Suci Nyepi\n3-20: Idul Fitri 1447H\n3-21: Idul Fitri 1447H\n4-3: Wafat Yesus Kristus\n5-1: Hari Buruh\n5-14: Kenaikan Yesus Kristus\n5-31: Hari Raya Waisak\n6-1: Hari Lahir Pancasila\n6-27: Idul Adha\n7-17: Tahun Baru Islam\n8-17: Hari Kemerdekaan RI\n9-26: Maulid Nabi\n12-25: Hari Raya Natal`,
-    "quoteText": "When your work speaks for itself, don't interrupt.",
-    "fontH": "sans-serif",
-    "fontQ": "serif"
-  },
-  "renderCode": `(ctx, canvas, cfg) => {
-        const now = new Date();
-        const m = now.getMonth();
-        const y = now.getFullYear();
-        const accent = cfg.accent;
-        const isDark = cfg.isDark;
+          "config": {
+            "posY_Progress": 2423,
+            "posY_Header": 742,
+            "posY_Table": 863,
+            "posY_Libur": 1880,
+            "isDark": true,
+            "fH": 94,
+            "fT": 60,
+            "accent": "#3D947F", 
+            "holidayText": formattedHolidayText,
+            "quoteText": "When your work speaks for itself, don't interrupt.",
+            "fontH": "sans-serif",
+            "fontQ": "serif"
+          },
+          "renderCode": `(ctx, canvas, cfg) => {
+                const now = new Date();
+                const m = now.getMonth();
+                const y = now.getFullYear();
+                const accent = cfg.accent;
+                const isDark = cfg.isDark;
 
-        // DATA JADWAL BANDUNG 2026
-        const imsakiyahBandung = [
-            ["04:28", "04:38", "18:20"], ["04:28", "04:38", "18:19"], ["04:28", "04:38", "18:19"], ["04:28", "04:38", "18:19"], ["04:28", "04:38", "18:18"],
-            ["04:28", "04:38", "18:18"], ["04:29", "04:39", "18:18"], ["04:29", "04:39", "18:17"], ["04:29", "04:39", "18:17"], ["04:29", "04:39", "18:17"],
-            ["04:29", "04:39", "18:16"], ["04:29", "04:39", "18:16"], ["04:29", "04:39", "18:15"], ["04:29", "04:39", "18:15"], ["04:29", "04:39", "18:15"],
-            ["04:29", "04:39", "18:14"], ["04:29", "04:39", "18:14"], ["04:29", "04:39", "18:13"], ["04:29", "04:39", "18:13"], ["04:29", "04:39", "18:12"],
-            ["04:29", "04:39", "18:12"], ["04:29", "04:39", "18:11"], ["04:29", "04:39", "18:11"], ["04:29", "04:39", "18:10"], ["04:29", "04:39", "18:10"],
-            ["04:29", "04:39", "18:10"], ["04:29", "04:39", "18:09"], ["04:29", "04:39", "18:09"], ["04:29", "04:39", "18:08"], ["04:29", "04:39", "18:08"]
-        ];
+                const imsakiyahBandung = [
+                    ["04:28", "04:38", "18:20"], ["04:28", "04:38", "18:19"], ["04:28", "04:38", "18:19"], ["04:28", "04:38", "18:19"], ["04:28", "04:38", "18:18"],
+                    ["04:28", "04:38", "18:18"], ["04:29", "04:39", "18:18"], ["04:29", "04:39", "18:17"], ["04:29", "04:39", "18:17"], ["04:29", "04:39", "18:17"],
+                    ["04:29", "04:39", "18:16"], ["04:29", "04:39", "18:16"], ["04:29", "04:39", "18:15"], ["04:29", "04:39", "18:15"], ["04:29", "04:39", "18:15"],
+                    ["04:29", "04:39", "18:14"], ["04:29", "04:39", "18:14"], ["04:29", "04:39", "18:13"], ["04:29", "04:39", "18:13"], ["04:29", "04:39", "18:12"],
+                    ["04:29", "04:39", "18:12"], ["04:29", "04:39", "18:11"], ["04:29", "04:39", "18:11"], ["04:29", "04:39", "18:10"], ["04:29", "04:39", "18:10"],
+                    ["04:29", "04:39", "18:10"], ["04:29", "04:39", "18:09"], ["04:29", "04:39", "18:09"], ["04:29", "04:39", "18:08"], ["04:29", "04:39", "18:08"]
+                ];
 
-        // Logika Hitung Ramadhan
-        const ramadhanStart = new Date(2026, 1, 19); 
-        const idulFitriDate = new Date(2026, 2, 20);
-        const diffTime = now - ramadhanStart;
-        const ramadhanDay = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
-        const isRamadhanActive = ramadhanDay >= 1 && ramadhanDay <= 30;
-        
-        const diffToLebaran = Math.ceil((idulFitriDate - now) / (1000 * 60 * 60 * 24));
-
-        const holidays = {};
-        if(cfg.holidayText) {
-            cfg.holidayText.split('\\n').forEach(line => {
-                const parts = line.split(':');
-                if(parts.length === 2) {
-                    const dateParts = parts[0].trim().split('-');
-                    const hMonth = parseInt(dateParts[0]) - 1;
-                    holidays[\`\${hMonth}-\${dateParts[1]}\`] = parts[1].trim();
-                }
-            });
-        }
-
-        const colorBG = isDark ? "#121212" : "#ffffff";
-        const colorTextMain = isDark ? "#ffffff" : "#2d3436";
-        const colorTextSub = isDark ? "#636e72" : "#b2bec3";
-        const colorCircle = isDark ? "rgba(255,255,255,0.05)" : "#f5f6fa";
-
-        ctx.fillStyle = colorBG;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // Progress Bar
-        const startYear = new Date(y, 0, 1);
-        const endYear = new Date(y + 1, 0, 1);
-        const dayOfYear = Math.floor((now - startYear) / (1000 * 60 * 60 * 24)) + 1;
-        const totalDays = Math.floor((endYear - startYear) / (1000 * 60 * 60 * 24));
-        const progress = ((now - startYear) / (endYear - startYear) * 100).toFixed(1);
-
-        ctx.textAlign = "center";
-        ctx.font = "bold 32px sans-serif";
-        ctx.fillStyle = colorTextSub;
-        ctx.fillText(\`DAY \${dayOfYear} OF \${totalDays} (\${progress}%)\`, canvas.width/2, cfg.posY_Progress - 40);
-
-        ctx.fillStyle = isDark ? "#222" : "#eee";
-        ctx.fillRect(150, cfg.posY_Progress, canvas.width - 300, 12);
-        ctx.fillStyle = accent;
-        ctx.fillRect(150, cfg.posY_Progress, (canvas.width - 300) * (progress/100), 12);
-
-        // Header
-        const names = ["JANUARI","FEBRUARI","MARET","APRIL","MEI","JUNI","JULI","AGUSTUS","SEPTEMBER","OKTOBER","NOVEMBER","DESEMBER"];
-        ctx.fillStyle = colorTextMain;
-        ctx.font = \`bold \${cfg.fH}px \${cfg.fontH || 'sans-serif'}\`;
-        ctx.fillText(names[m], canvas.width/2, cfg.posY_Header);
-        ctx.fillStyle = accent;
-        ctx.font = \`300 \${cfg.fH * 0.4}px \${cfg.fontH || 'sans-serif'}\`;
-        ctx.fillText(y, canvas.width/2, cfg.posY_Header + (cfg.fH * 0.45));
-
-        // Kalender
-        const days = ["MIN", "SEN", "SEL", "RAB", "KAM", "JUM", "SAB"];
-        const colW = (canvas.width * 0.85) / 7;
-        const startX = (canvas.width - (colW * 7)) / 2;
-        ctx.font = \`bold \${cfg.fT * 0.55}px sans-serif\`;
-        days.forEach((d, i) => {
-            ctx.fillStyle = (i === 0) ? accent : colorTextSub;
-            ctx.fillText(d, startX + (i * colW) + colW/2, cfg.posY_Table);
-        });
-
-        const first = new Date(y, m, 1).getDay();
-        const total = new Date(y, m + 1, 0).getDate();
-        let row = 0; let found = [];
-
-        for (let d = 1; d <= total; d++) {
-            let col = (d + first - 1) % 7;
-            let px = startX + (col * colW) + colW/2;
-            let py = cfg.posY_Table + 160 + (row * cfg.fT * 2.5);
-            const libur = holidays[\`\${m}-\${d}\`];
-            if (libur) found.push({d, n: libur});
-
-            ctx.beginPath();
-            ctx.arc(px, py - cfg.fT/3, cfg.fT * 0.9, 0, Math.PI * 2);
-            ctx.fillStyle = (d === now.getDate()) ? accent : (col === 0 || libur ? accent + "25" : colorCircle);
-            ctx.fill();
-
-            ctx.textAlign = "center";
-            ctx.font = (d === now.getDate()) ? \`bold \${cfg.fT}px sans-serif\` : \`\${cfg.fT}px sans-serif\`;
-            ctx.fillStyle = (d === now.getDate()) ? "#fff" : (col === 0 || libur ? accent : colorTextMain);
-            ctx.fillText(d, px, py);
-            
-            if (col === 6) row++;
-        }
-
-        // --- SECTION DETAIL ---
-        const listX = startX;
-        const detailY = cfg.posY_Libur;
-
-        // Hari Libur (Kiri)
-        if (found.length > 0) {
-            ctx.textAlign = "left"; 
-            ctx.fillStyle = accent;
-            ctx.font = \`bold \${cfg.fT * 0.5}px sans-serif\`;
-            ctx.fillText("HARI LIBUR NASIONAL", listX, detailY);
-            found.forEach((h, i) => {
-                ctx.fillStyle = isDark ? "#bdc3c7" : "#636e72";
-                ctx.font = \`\${cfg.fT * 0.45}px sans-serif\`;
-                ctx.fillText(\`• \${h.d}: \${h.n}\`, listX, detailY + 75 + (i * 65));
-            });
-        }
-
-        // Detail Ramadhan (Kanan)
-        if (isRamadhanActive) {
-            const ramadhanX = canvas.width - startX - 350;
-            const dataHariIni = imsakiyahBandung[ramadhanDay - 1];
-            ctx.textAlign = "left";
-            ctx.fillStyle = accent;
-            ctx.font = \`bold \${cfg.fT * 0.5}px sans-serif\`;
-            ctx.fillText("JADWAL IMSAKIYAH", ramadhanX, detailY);
-
-            // Row 1: Ramadhan ke -
-            let currentY = detailY + 75;
-            const textL = "Ramadhan ke";
-            ctx.fillStyle = isDark ? "#bdc3c7" : "#636e72";
-            ctx.font = \`\${cfg.fT * 0.45}px sans-serif\`;
-            ctx.fillText(textL, ramadhanX, currentY);
-
-            const labelWidth = ctx.measureText(textL).width;
-            const bX = ramadhanX + labelWidth + 35;
-            const bY = currentY - 15;
-
-            ctx.beginPath();
-            ctx.arc(bX, bY+4, 25, 0, Math.PI * 2);
-            ctx.fillStyle = accent;
-            ctx.fill();
-            
-            ctx.fillStyle = "#fff";
-            ctx.textAlign = "center";
-            ctx.font = \`bold \${cfg.fT * 0.4}px sans-serif\`;
-            ctx.fillText(ramadhanDay, bX, bY + 14);
-
-            // Jam (Imsyak, Shubuh, Maghrib)
-            const schedule = [
-                { l: "Imsyak", v: dataHariIni[0] },
-                { l: "Shubuh", v: dataHariIni[1] },
-                { l: "Maghrib", v: dataHariIni[2] }
-            ];
-
-            ctx.textAlign = "left";
-            schedule.forEach((s, i) => {
-                ctx.fillStyle = isDark ? "#bdc3c7" : "#636e72";
-                ctx.font = \`\${cfg.fT * 0.45}px sans-serif\`;
-                currentY += 60;
-                ctx.fillText(s.l, ramadhanX, currentY);
-                ctx.fillText(\":  \" + s.v.replace(':', '.'), ramadhanX + 130, currentY);
-            });
-
-            // Row Akhir: H-X Menuju Idul Fitri
-            if (diffToLebaran > 0) {
-                currentY += 80;
-                ctx.fillStyle = isDark ? "#bdc3c7" : "#636e72";
-                ctx.font = \`\${cfg.fT * 0.45}px sans-serif\`;
-                const textH = "H - ";
-                ctx.fillText(textH, ramadhanX, currentY);
+                const ramadhanStart = new Date(2026, 1, 19); 
+                const idulFitriDate = new Date(2026, 2, 20);
+                const diffTime = now - ramadhanStart;
+                const ramadhanDay = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                const isRamadhanActive = ramadhanDay >= 1 && ramadhanDay <= 30;
                 
-                const hWidth = ctx.measureText(textH).width;
-                const circleHX = ramadhanX + hWidth + 25;
-                const circleHY = currentY - 15;
+                const diffToLebaran = Math.ceil((idulFitriDate - now) / (1000 * 60 * 60 * 24));
 
-                ctx.beginPath();
-                ctx.arc(circleHX, circleHY + 4, 25, 0, Math.PI * 2);
-                ctx.fillStyle = "#e67e22"; 
-                ctx.fill();
+                const holidays = {};
+                if(cfg.holidayText) {
+                    cfg.holidayText.split('\\n').forEach(line => {
+                        const parts = line.split(':');
+                        if(parts.length === 2) {
+                            const dateParts = parts[0].trim().split('-');
+                            const hMonth = parseInt(dateParts[0]) - 1;
+                            holidays[\`\${hMonth}-\${dateParts[1]}\`] = parts[1].trim();
+                        }
+                    });
+                }
 
-                ctx.fillStyle = "#fff";
+                const colorBG = isDark ? "#121212" : "#ffffff";
+                const colorTextMain = isDark ? "#ffffff" : "#2d3436";
+                const colorTextSub = isDark ? "#636e72" : "#b2bec3";
+                const colorCircle = isDark ? "rgba(255,255,255,0.05)" : "#f5f6fa";
+
+                ctx.fillStyle = colorBG;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                const startYear = new Date(y, 0, 1);
+                const endYear = new Date(y + 1, 0, 1);
+                const dayOfYear = Math.floor((now - startYear) / (1000 * 60 * 60 * 24)) + 1;
+                const totalDays = Math.floor((endYear - startYear) / (1000 * 60 * 60 * 24));
+                const progress = ((now - startYear) / (endYear - startYear) * 100).toFixed(1);
+
                 ctx.textAlign = "center";
-                ctx.font = \`bold \${cfg.fT * 0.4}px sans-serif\`;
-                ctx.fillText(diffToLebaran, circleHX, circleHY + 14);
+                ctx.font = "bold 32px sans-serif";
+                ctx.fillStyle = colorTextSub;
+                ctx.fillText(\`DAY \${dayOfYear} OF \${totalDays} (\${progress}%)\`, canvas.width/2, cfg.posY_Progress - 40);
 
-                ctx.textAlign = "left";
-                ctx.fillStyle = isDark ? "#bdc3c7" : "#636e72";
-                ctx.fillText(" Menuju Idul Fitri", circleHX + 35, currentY);
-            }
-        }
-    }`
-};
+                ctx.fillStyle = isDark ? "#222" : "#eee";
+                ctx.fillRect(150, cfg.posY_Progress, canvas.width - 300, 12);
+                ctx.fillStyle = accent;
+                ctx.fillRect(150, cfg.posY_Progress, (canvas.width - 300) * (progress/100), 12);
+
+                const names = ["JANUARI","FEBRUARI","MARET","APRIL","MEI","JUNI","JULI","AGUSTUS","SEPTEMBER","OKTOBER","NOVEMBER","DESEMBER"];
+                ctx.fillStyle = colorTextMain;
+                ctx.font = \`bold \${cfg.fH}px \${cfg.fontH || 'sans-serif'}\`;
+                ctx.fillText(names[m], canvas.width/2, cfg.posY_Header);
+                ctx.fillStyle = accent;
+                ctx.font = \`300 \${cfg.fH * 0.4}px \${cfg.fontH || 'sans-serif'}\`;
+                ctx.fillText(y, canvas.width/2, cfg.posY_Header + (cfg.fH * 0.45));
+
+                const days = ["MIN", "SEN", "SEL", "RAB", "KAM", "JUM", "SAB"];
+                const colW = (canvas.width * 0.85) / 7;
+                const startX = (canvas.width - (colW * 7)) / 2;
+                ctx.font = \`bold \${cfg.fT * 0.55}px sans-serif\`;
+                days.forEach((d, i) => {
+                    ctx.fillStyle = (i === 0) ? accent : colorTextSub;
+                    ctx.fillText(d, startX + (i * colW) + colW/2, cfg.posY_Table);
+                });
+
+                const first = new Date(y, m, 1).getDay();
+                const total = new Date(y, m + 1, 0).getDate();
+                let row = 0; let found = [];
+
+                for (let d = 1; d <= total; d++) {
+                    let col = (d + first - 1) % 7;
+                    let px = startX + (col * colW) + colW/2;
+                    let py = cfg.posY_Table + 160 + (row * cfg.fT * 2.5);
+                    const libur = holidays[\`\${m}-\${d}\`];
+                    if (libur) found.push({d, n: libur});
+
+                    ctx.beginPath();
+                    ctx.arc(px, py - cfg.fT/3, cfg.fT * 0.9, 0, Math.PI * 2);
+                    ctx.fillStyle = (d === now.getDate()) ? accent : (col === 0 || libur ? accent + "25" : colorCircle);
+                    ctx.fill();
+
+                    ctx.textAlign = "center";
+                    ctx.font = (d === now.getDate()) ? \`bold \${cfg.fT}px sans-serif\` : \`\${cfg.fT}px sans-serif\`;
+                    ctx.fillStyle = (d === now.getDate()) ? "#fff" : (col === 0 || libur ? accent : colorTextMain);
+                    ctx.fillText(d, px, py);
+                    
+                    if (col === 6) row++;
+                }
+
+                const listX = startX;
+                const detailY = cfg.posY_Libur;
+
+                if (found.length > 0) {
+                    ctx.textAlign = "left"; 
+                    ctx.fillStyle = accent;
+                    ctx.font = \`bold \${cfg.fT * 0.5}px sans-serif\`;
+                    ctx.fillText("HARI LIBUR NASIONAL", listX, detailY);
+                    found.forEach((h, i) => {
+                        ctx.fillStyle = isDark ? "#bdc3c7" : "#636e72";
+                        ctx.font = \`\${cfg.fT * 0.45}px sans-serif\`;
+                        ctx.fillText(\`• \${h.d}: \${h.n}\`, listX, detailY + 75 + (i * 65));
+                    });
+                }
+
+                if (isRamadhanActive) {
+                    const ramadhanX = canvas.width - startX - 350;
+                    const dataHariIni = imsakiyahBandung[ramadhanDay - 1];
+                    ctx.textAlign = "left";
+                    ctx.fillStyle = accent;
+                    ctx.font = \`bold \${cfg.fT * 0.5}px sans-serif\`;
+                    ctx.fillText("JADWAL IMSAKIYAH", ramadhanX, detailY);
+
+                    let currentY = detailY + 75;
+                    const textL = "Ramadhan ke";
+                    ctx.fillStyle = isDark ? "#bdc3c7" : "#636e72";
+                    ctx.font = \`\${cfg.fT * 0.45}px sans-serif\`;
+                    ctx.fillText(textL, ramadhanX, currentY);
+
+                    const labelWidth = ctx.measureText(textL).width;
+                    const bX = ramadhanX + labelWidth + 35;
+                    const bY = currentY - 15;
+
+                    ctx.beginPath();
+                    ctx.arc(bX, bY+4, 25, 0, Math.PI * 2);
+                    ctx.fillStyle = accent;
+                    ctx.fill();
+                    
+                    ctx.fillStyle = "#fff";
+                    ctx.textAlign = "center";
+                    ctx.font = \`bold \${cfg.fT * 0.4}px sans-serif\`;
+                    ctx.fillText(ramadhanDay, bX, bY + 14);
+
+                    const schedule = [
+                        { l: "Imsyak", v: dataHariIni[0] },
+                        { l: "Shubuh", v: dataHariIni[1] },
+                        { l: "Maghrib", v: dataHariIni[2] }
+                    ];
+
+                    ctx.textAlign = "left";
+                    schedule.forEach((s, i) => {
+                        ctx.fillStyle = isDark ? "#bdc3c7" : "#636e72";
+                        ctx.font = \`\${cfg.fT * 0.45}px sans-serif\`;
+                        currentY += 60;
+                        ctx.fillText(s.l, ramadhanX, currentY);
+                        ctx.fillText(\":  \" + s.v.replace(':', '.'), ramadhanX + 130, currentY);
+                    });
+
+                    if (diffToLebaran > 0) {
+                        currentY += 80;
+                        ctx.fillStyle = isDark ? "#bdc3c7" : "#636e72";
+                        ctx.font = \`\${cfg.fT * 0.45}px sans-serif\`;
+                        const textH = "H - ";
+                        ctx.fillText(textH, ramadhanX, currentY);
+                        
+                        const hWidth = ctx.measureText(textH).width;
+                        const circleHX = ramadhanX + hWidth + 25;
+                        const circleHY = currentY - 15;
+
+                        ctx.beginPath();
+                        ctx.arc(circleHX, circleHY + 4, 25, 0, Math.PI * 2);
+                        ctx.fillStyle = "#e67e22"; 
+                        ctx.fill();
+
+                        ctx.fillStyle = "#fff";
+                        ctx.textAlign = "center";
+                        ctx.font = \`bold \${cfg.fT * 0.4}px sans-serif\`;
+                        ctx.fillText(diffToLebaran, circleHX, circleHY + 14);
+
+                        ctx.textAlign = "left";
+                        ctx.fillStyle = isDark ? "#bdc3c7" : "#636e72";
+                        ctx.fillText(" Menuju Idul Fitri", circleHX + 35, currentY);
+                    }
+                }
+            }`
+        };
 
         function generateImage() {
             const canvas = document.createElement('canvas');
