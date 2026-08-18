@@ -13,6 +13,6 @@ var holidayData = [
   { month: 6, day: 27, name: "Idul Adha" },
   { month: 7, day: 17, name: "Tahun Baru Islam" },
   { month: 8, day: 17, name: "Hari Kemerdekaan RI" },
-  { month: 9, day: 26, name: "Maulid Nabi" },
+  { month: 8, day: 25, name: "Maulid Nabi" },
   { month: 12, day: 25, name: "Hari Raya Natal" }
 ];
